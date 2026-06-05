@@ -73,17 +73,28 @@ export default function Home() {
     if (user) carregarDadosFinanceiros(user.id, dataFiltro);
   }, [dataFiltro, user]);
 
-  // Gerenciamento de categorias automáticas
+  // Gerenciamento de categorias automáticas personalizadas
   async function gerenciarCategoriasPadrao(userId: string) {
     const { data: existentes } = await supabase.from('categorias').select('*').eq('user_id', userId);
     if (!existentes || existentes.length === 0) {
       const padrao = [
-        { user_id: userId, nome: 'Alimentação', tipo: 'saida', core: '#ef4444' },
-        { user_id: userId, nome: 'Transporte', tipo: 'saida', cor: '#3b82f6' },
-        { user_id: userId, nome: 'Lazer', tipo: 'saida', cor: '#10b981' },
+        // ENTRADAS
         { user_id: userId, nome: 'Salário', tipo: 'entrada', cor: '#10b981' },
-        { user_id: userId, nome: 'Outros Ganhos', tipo: 'entrada', cor: '#f59e0b' },
-        { user_id: userId, nome: 'Outros Gastos', tipo: 'saida', cor: '#6b7280' },
+        { user_id: userId, nome: 'Extra', tipo: 'entrada', cor: '#34d399' },
+        { user_id: userId, nome: 'Outros ganhos', tipo: 'entrada', cor: '#f59e0b' },
+        { user_id: userId, nome: 'Serviços', tipo: 'entrada', cor: '#60a5fa' },
+        
+        // SAÍDAS
+        { user_id: userId, nome: 'Alimentação', tipo: 'saida', cor: '#ef4444' },
+        { user_id: userId, nome: 'Transporte', tipo: 'saida', cor: '#3b82f6' },
+        { user_id: userId, nome: 'Água', tipo: 'saida', cor: '#06b6d4' },
+        { user_id: userId, nome: 'Luz', tipo: 'saida', cor: '#eab308' },
+        { user_id: userId, nome: 'Internet', tipo: 'saida', cor: '#6366f1' },
+        { user_id: userId, nome: 'Telefone', tipo: 'saida', cor: '#a855f7' },
+        { user_id: userId, nome: 'Pet', tipo: 'saida', cor: '#f97316' },
+        { user_id: userId, nome: 'Vestuário', tipo: 'saida', cor: '#ec4899' },
+        { user_id: userId, nome: 'Lazer', tipo: 'saida', cor: '#14b8a6' },
+        { user_id: userId, nome: 'Outros Gastos', tipo: 'saida', cor: '#6b7280' }
       ];
       await supabase.from('categorias').insert(padrao);
       const { data: atualizadas } = await supabase.from('categorias').select('*').eq('user_id', userId);
@@ -93,7 +104,7 @@ export default function Home() {
     }
   }
 
-  // Buscar dados reais baseados estritamente nas datas locais
+  // Buscar dados reais baseados estritamente das datas locais
   async function carregarDadosFinanceiros(userId: string, dataAlvo: Date) {
     const ano = dataAlvo.getFullYear();
     const mes = dataAlvo.getMonth();
