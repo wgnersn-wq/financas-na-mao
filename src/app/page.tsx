@@ -155,77 +155,91 @@ export default function Home() {
   // Formulário de Autenticação / Login Inicial
   if (!user) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-50 flex flex-col justify-center px-6 max-w-md mx-auto shadow-2xl border-x border-slate-900">
-        <div className="text-center mb-8">
-          <div className="bg-emerald-500/10 p-4 rounded-2xl border border-emerald-500/20 inline-block mb-3">
-            <Wallet className="w-10 h-10 text-emerald-400" />
-          </div>
-          <h2 className="text-2xl font-black tracking-tight">Finanças na Mão</h2>
-          <p className="text-sm text-slate-400 mt-1">Seu controle financeiro pessoal de qualquer lugar</p>
-        </div>
-        <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-4 shadow-xl">
-          <h3 className="text-lg font-bold text-slate-100">{isLogin ? 'Faça seu Login' : 'Criar Nova Conta'}</h3>
-          <form onSubmit={handleAuth} className="space-y-4">
-            <div>
-              <label className="text-xs text-slate-400 font-medium block mb-1">E-mail</label>
-              <div className="relative"><Mail className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
-                <input type="email" required placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-colors" />
-              </div>
+      // O fundo agora ocupa 100% do ecrã (w-full) sem cortar as laterais
+      <div className="min-h-screen bg-slate-950 text-slate-50 flex flex-col justify-center px-4 w-full">
+        
+        {/* O conteúdo de dentro sim, fica centralizado e com largura controlada no PC */}
+        <div className="w-full max-w-sm mx-auto">
+          <div className="text-center mb-8">
+            <div className="bg-emerald-500/10 p-4 rounded-2xl border border-emerald-500/20 inline-block mb-3">
+              <Wallet className="w-10 h-10 text-emerald-400" />
             </div>
-            <div>
-              <label className="text-xs text-slate-400 font-medium block mb-1">Senha</label>
-              <div className="relative"><Lock className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
-                <input type="password" required placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-colors" />
+            <h2 className="text-2xl font-black tracking-tight">Finanças na Mão</h2>
+            <p className="text-sm text-slate-400 mt-1">Seu controle financeiro pessoal de qualquer lugar</p>
+          </div>
+          
+          <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-4 shadow-xl">
+            <h3 className="text-lg font-bold text-slate-100">{isLogin ? 'Faça seu Login' : 'Criar Nova Conta'}</h3>
+            <form onSubmit={handleAuth} className="space-y-4">
+              <div>
+                <label className="text-xs text-slate-400 font-medium block mb-1">E-mail</label>
+                <div className="relative"><Mail className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+                  <input type="email" required placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-colors" />
+                </div>
               </div>
+              <div>
+                <label className="text-xs text-slate-400 font-medium block mb-1">Senha</label>
+                <div className="relative"><Lock className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+                  <input type="password" required placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-colors" />
+                </div>
+              </div>
+              {authError && <p className="text-xs text-rose-400 font-medium bg-rose-500/10 p-3 rounded-xl border border-rose-500/20">{authError}</p>}
+              {authSuccess && <p className="text-xs text-emerald-400 font-medium bg-emerald-500/10 p-3 rounded-xl border border-rose-500/20">{authSuccess}</p>}
+              <button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 rounded-xl text-sm shadow-lg shadow-emerald-950/20 transition-colors">{isLogin ? 'Entrar' : 'Cadastrar Conta'}</button>
+            </form>
+            <div className="text-center pt-2">
+              <button onClick={() => { setIsLogin(!isLogin); setAuthError(''); setAuthSuccess(''); }} className="text-xs text-emerald-400 font-semibold hover:underline">{isLogin ? 'Não tem conta? Cadastre-se' : 'Já tem uma conta? Entre aqui'}</button>
             </div>
-            {authError && <p className="text-xs text-rose-400 font-medium bg-rose-500/10 p-3 rounded-xl border border-rose-500/20">{authError}</p>}
-            {authSuccess && <p className="text-xs text-emerald-400 font-medium bg-emerald-500/10 p-3 rounded-xl border border-emerald-500/20">{authSuccess}</p>}
-            <button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 rounded-xl text-sm shadow-lg shadow-emerald-950/20 transition-colors">{isLogin ? 'Entrar' : 'Cadastrar Conta'}</button>
-          </form>
-          <div className="text-center pt-2">
-            <button onClick={() => { setIsLogin(!isLogin); setAuthError(''); setAuthSuccess(''); }} className="text-xs text-emerald-400 font-semibold hover:underline">{isLogin ? 'Não tem conta? Cadastre-se' : 'Já tem uma conta? Entre aqui'}</button>
           </div>
         </div>
+
       </div>
     );
   }
 
   // Interface Principal com Componentização Estruturada
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-50 flex flex-col justify-between max-w-md mx-auto shadow-2xl border-x border-slate-900 pb-24 relative">
-      <header className="px-6 pt-8 pb-4 flex justify-between items-center bg-slate-900/50 backdrop-blur border-b border-b-slate-900 sticky top-0 z-10">
-        <div className="flex items-center gap-2">
-          <div className="bg-emerald-500/20 p-2 rounded-xl border border-emerald-500/30"><Wallet className="w-6 h-6 text-emerald-400" /></div>
-          <div><p className="text-xs text-slate-400">Painel de Controle</p><h1 className="text-sm font-bold text-slate-100 truncate max-w-[180px]">{user.email}</h1></div>
-        </div>
-        <button type="button" onClick={() => supabase.auth.signOut()} className="w-8 h-8 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-rose-400 hover:bg-slate-800 transition-colors"><LogOut className="w-4 h-4" /></button>
-      </header>
+    // Removido max-w-md daqui para o fundo azul-escuro preencher o ecrã inteiro do telemóvel
+    <div className="min-h-screen bg-slate-950 text-slate-50 flex flex-col justify-between w-full pb-24 relative">
+      
+      {/* Container de largura máxima centralizado para alinhar o conteúdo no PC e Telemóvel */}
+      <div className="w-full max-w-md mx-auto flex flex-col flex-1">
+        
+        <header className="px-6 pt-8 pb-4 flex justify-between items-center bg-slate-900/50 backdrop-blur border-b border-b-slate-900 sticky top-0 z-10">
+          <div className="flex items-center gap-2">
+            <div className="bg-emerald-500/20 p-2 rounded-xl border border-emerald-500/30"><Wallet className="w-6 h-6 text-emerald-400" /></div>
+            <div><p className="text-xs text-slate-400">Painel de Controle</p><h1 className="text-sm font-bold text-slate-100 truncate max-w-[180px]">{user.email}</h1></div>
+          </div>
+          <button type="button" onClick={() => supabase.auth.signOut()} className="w-8 h-8 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-rose-400 hover:bg-slate-800 transition-colors"><LogOut className="w-4 h-4" /></button>
+        </header>
 
-      <main className="flex-1 px-6 pt-6 overflow-y-auto space-y-6">
-        {/* 1. FILTRO DE MÊS */}
-        <MonthFilter dataFiltro={dataFiltro} onChangeMes={alterarMes} />
+        <main className="flex-1 px-6 pt-6 overflow-y-auto space-y-6">
+          {/* 1. FILTRO DE MÊS */}
+          <MonthFilter dataFiltro={dataFiltro} onChangeMes={alterarMes} />
 
-        {/* 2. CARDS DO DASHBOARD */}
-        <DashboardCards saldo={saldo} entraces={entraces} saidas={saidas} />
+          {/* 2. CARDS DO DASHBOARD */}
+          <DashboardCards saldo={saldo} entraces={entraces} saidas={saidas} />
 
-        {/* BOTÃO ADICIONAR LANÇAMENTO (Foco Mobile) */}
-        <button 
-          type="button"
-          onClick={() => setIsModalOpen(true)} 
-          className="w-full bg-slate-900 hover:bg-slate-850 border border-dashed border-slate-700 hover:border-emerald-500/50 rounded-2xl p-4 flex items-center justify-center gap-3 transition-all text-slate-300 hover:text-emerald-400 group"
-        >
-          <PlusCircle className="w-5 h-5 text-slate-400 group-hover:text-emerald-400 transition-colors" />
-          <span className="text-sm font-semibold">Novo Lançamento Rápido</span>
-        </button>
+          {/* BOTÃO ADICIONAR LANÇAMENTO (Foco Mobile) */}
+          <button 
+            type="button"
+            onClick={() => setIsModalOpen(true)} 
+            className="w-full bg-slate-900 hover:bg-slate-850 border border-dashed border-slate-700 hover:border-emerald-500/50 rounded-2xl p-4 flex items-center justify-center gap-3 transition-all text-slate-300 hover:text-emerald-400 group"
+          >
+            <PlusCircle className="w-5 h-5 text-slate-400 group-hover:text-emerald-400 transition-colors" />
+            <span className="text-sm font-semibold">Novo Lançamento Rápido</span>
+          </button>
 
-        {/* 3. LISTA HISTÓRICA E MODAL DE DELEÇÃO */}
-        <TransactionList 
-          transacoes={transacoes} 
-          categorias={categorias} 
-          dataFiltro={dataFiltro} 
-          onRefresh={() => carregarDadosFinanceiros(user.id, dataFiltro)} 
-        />
-      </main>
+          {/* 3. LISTA HISTÓRICA E MODAL DE DELEÇÃO */}
+          <TransactionList \
+            transacoes={transacoes} \
+            categorias={categorias} \
+            dataFiltro={dataFiltro} \
+            onRefresh={() => carregarDadosFinanceiros(user.id, dataFiltro)} \
+          />
+        </main>
+
+      </div>
 
       {/* 4. MODAL / FORMULÁRIO DE INSERÇÃO */}
       <TransactionForm 
@@ -237,7 +251,7 @@ export default function Home() {
         onSuccess={() => carregarDadosFinanceiros(user.id, dataFiltro)} 
       />
 
-      {/* NAVBAR INFERIOR (Mantido fixado e idêntico na base) */}
+      {/* NAVBAR INFERIOR */}
       <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-slate-900/90 backdrop-blur-md border-t border-slate-800/80 px-8 py-3 flex justify-around items-center z-20">
         <button type="button" className="flex flex-col items-center gap-1 text-emerald-400">
           <Wallet className="w-5 h-5" />
