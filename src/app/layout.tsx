@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -12,11 +12,26 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// CONFIGURAÇÃO DOS METADADOS DO PWA E MOBILE-FIRST
+// 1. CONFIGURAÇÃO DOS METADADOS DO PWA (PADRÃO OFICIAL NEXT.JS)
 export const metadata: Metadata = {
   title: "Finanças na Mão",
   description: "Seu controle financeiro pessoal de qualquer lugar",
-  manifest: "/manifest.json", // <-- Crucial para o PWA ser reconhecido pelo telemóvel
+  manifest: "/manifest.json", // Vincula o PWA
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Finanças na Mão",
+  },
+};
+
+// 2. CONFIGURAÇÃO VISUAL MOBILE E VIEWPORT (EXIGIDO PELO NEXT.JS EM COMPONENTES DE SERVIDOR)
+export const viewport: Viewport = {
+  themeColor: "#020617",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover", // Faz o app ocupar a área total até em telas com notch/câmera na tela
 };
 
 export default function RootLayout({
@@ -29,16 +44,6 @@ export default function RootLayout({
       lang="pt-BR"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <head>
-        {/* Configurações estritas para o comportamento mobile nativo (PWA) */}
-        <meta name="theme-color" content="#020617" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta 
-          name="viewport" 
-          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" 
-        />
-      </head>
       <body className="min-h-full flex flex-col bg-slate-950 text-slate-50">
         {children}
       </body>
