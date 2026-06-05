@@ -1,0 +1,106 @@
+===============================================================================
+PROJETO: SISTEMA DE CONTROLE FINANCEIRO PESSOAL MOBILE-FIRST
+ARQUIVAMENTO E ESCOPO PASSO A PASSO
+===============================================================================
+
+-------------------------------------------------------------------------------
+1. ESCOPO DO PROJETO E FASES DE DESENVOLVIMENTO
+-------------------------------------------------------------------------------
+
+FASE 1: PLANEJAMENTO E ARQUITETURA DA INFORMAÇÃO [CONCLUÍDO]
+- Definição exata dos requisitos (O que o app vai fazer no MVP).
+- Desenho do fluxo de telas no papel ou Figma (Foco total em Mobile-First).
+- Modelagem final do Banco de Dados Relacional.
+
+FASE 2: CONFIGURAÇÃO DO AMBIENTE E BACKEND (SUPABASE) [CONCLUÍDO]
+- Criação do projeto no Supabase e ativação do módulo de Autenticação (Auth).
+- Criação das tabelas (Categorias e Transações) via painel ou Script SQL.
+- Configuração das políticas de segurança (RLS - Row Level Security) para garantir 
+  que um usuário nunca veja os dados de outro.
+
+FASE 3: DESENVOLVIMENTO DO FRONT-END (NEXT.JS + TAILWIND CSS) [CONCLUÍDO]
+- Inicialização do projeto Next.js com TypeScript e Tailwind CSS.
+- Configuração do layout básico estrutural (Navbar inferior para celular).
+- Integração do SDK do Supabase no Next.js.
+
+FASE 4: FLUXO DE AUTENTICAÇÃO E SEGURANÇA [CONCLUÍDO]
+- Criação da tela de Login e tela de Cadastro otimizadas para celular.
+- Implementação de fluxos de login/logout e escuta de estado de sessão ativa.
+
+FASE 5: DASHBOARD FINANCEIRO E LANÇAMENTOS (O CORAÇÃO DO APP) [EM ANDAMENTO]
+- Criação da tela principal com Saldo Atual, Total de Entradas e Total de Saídas [CONCLUÍDO].
+- Desenvolvimento do Formulário de Transações com máscara monetária nativa [CONCLUÍDO].
+- Listagem de transações dinâmicas filtradas por Mês e Ano de navegação [CONCLUÍDO].
+- Substituição de modais nativos por modais UI elegantes e customizados [CONCLUÍDO].
+- IMPLEMENTAÇÃO ATUAL: Exclusão inteligente de parcelamentos vinculados através da coluna 'id_parcelamento'[CONCLUÍDO]..
+
+FASE 6: AJUSTES MÓVEIS, PWA E DEPLOY [A FAZER]
+- Configuração do manifesto PWA (para instalar o app na tela inicial do celular).
+- Testes de usabilidade em navegadores mobile (Safari, Chrome Mobile).
+- Vinculação com o GitHub e Deploy final na Vercel de forma 100% gratuita.
+
+-------------------------------------------------------------------------------
+2. ARQUITETURA FÍSICA E FLUXO DE DADOS (INFRAESTRUTURA)
+-------------------------------------------------------------------------------
+
+[ DISPOSITIVO CELULAR / USUÁRIO ]
+       │
+       │ (Acessa via Navegador Web ou Ícone PWA)
+       │
+       ▼
+ [ VERCEL (Hospedagem Cloud) ] ── Hosting do Front-End (Next.js Estático/Serverless)
+       │
+       │ (Requisições HTTP / Conexão SDK Web Segura)
+       │
+       ▼
+ [ SUPABASE ECOSYSTEM ]
+       ├── API Gateway / Kong (Gerencia as requisições seguras)
+       ├── GoTrue (Módulo de Autenticação / Login / JWT)
+       └── PostgreSQL Database (Banco de Dados Otimizado na Nuvem)
+
+-------------------------------------------------------------------------------
+3. MODELAGEM COMPLETA DO BANCO DE DADOS (SQL PARA O SUPABASE)
+-------------------------------------------------------------------------------
+Script de migração executado e atualizado com sucesso no Supabase:
+
+-- Habilitar a extensão de criptografia e UUIDs se não estiver ativa
+create extension if not exists "uuid-ossp";
+
+-- TABELA DE CATEGORIAS
+create table categorias (
+    id uuid default uuid_generate_v4() primary key,
+    user_id uuid references auth.users(id) on delete cascade not null,
+    nome text not null,
+    tipo text check (tipo in ('entrada', 'saida')) not null,
+    cor text default '#3b82f6',
+    criado_em timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- TABELA DE TRANSAÇÕES
+create table transacoes (
+    id uuid default uuid_generate_v4() primary key,
+    user_id uuid references auth.users(id) on delete cascade not null,
+    categoria_id uuid references categorias(id) on delete set null,
+    descricao text not null,
+    valor numeric(12,2) not null check (valor > 0),
+    tipo text check (tipo in ('entrada', 'saida')) not null,
+    data_transacao date default current_date not null,
+    id_parcelamento text, -- Coluna adicionada para vincular compras parceladas
+    pago boolean default true not null,
+    criado_em timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- ATIVAÇÃO DA SEGURANÇA (RLS) - CRUCIAL PARA SISTEMA FINANCEIRO
+alter table categorias enable row level security;
+alter table transacoes enable row level security;
+
+-- POLÍTICAS DE ACESSO (O usuário só lê e edita o que for DELE)
+create policy "Usuários podem gerenciar suas próprias categorias" 
+on categorias for all using (auth.uid() = user_id);
+
+create policy "Usuários podem gerenciar suas próprias transações" 
+on transacoes for all using (auth.uid() = user_id);
+
+===============================================================================
+FIM DO DOCUMENTO DE ESCOPO - Salve como 'escopo_projeto.txt'
+===============================================================================
