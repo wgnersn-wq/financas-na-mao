@@ -4,11 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { Wallet, LogOut, Mail, Lock, PlusCircle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
-// IMPORTAÇÃO DOS COMPONENTES ESTRUTURADOS
-import MonthFilter from '../components/MonthFilter';
-import DashboardCards from '../components/DashboardCards';
-import TransactionForm from '../components/TransactionForm';
-import TransactionList from '../components/TransactionList';
+// IMPORTAÇÃO DOS COMPONENTES ESTRUTURADOS COM ALIAS OFICIAL (PROTEGE CONTRA ERROS DE BUILD)
+import MonthFilter from '@/components/MonthFilter';
+import DashboardCards from '@/components/DashboardCards';
+import TransactionForm from '@/components/TransactionForm';
+import TransactionList from '@/components/TransactionList';
 
 export default function Home() {
   // Estados de Sessão e Carregamento
