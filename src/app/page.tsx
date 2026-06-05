@@ -40,23 +40,28 @@ export default function Home() {
 
   // 1. Verificar autenticação inicial e monitorar mudanças de sessão
   useEffect(() => {
-    async function checkUser() {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      if (user) {
-        await gerenciarCategoriasPadrao(user.id);
-        carregarDadosFinanceiros(user.id, new Date());
-      }
+    let isSubscribed = true;
+
+    async function carregarTudo(usuario: any) {
+      if (!isSubscribed) return;
+      setUser(usuario);
+      await gerenciarCategoriasPadrao(usuario.id);
+      carregarDadosFinanceiros(usuario.id, new Date());
       setLoading(false);
     }
-    checkUser();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        await gerenciarCategoriasPadrao(session.user.id);
-        carregarDadosFinanceiros(session.user.id, new Date());
-      } else {
+    // Verifica quem é o usuário logo que a página abre
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) carregarTudo(user);
+      else setLoading(false);
+    });
+
+    // Fica de olho no login/logout, mas filtra os eventos para não rodar duplicado
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        carregarTudo(session.user);
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
         setTransacoes([]);
         setCategorias([]);
         setSaldo(0);
@@ -65,7 +70,10 @@ export default function Home() {
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isSubscribed = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   // Recarregar os dados automaticamente quando o usuário mudar o mês do filtro
