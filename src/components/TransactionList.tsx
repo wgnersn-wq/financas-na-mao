@@ -2,12 +2,13 @@
 
 import React, { useState } from 'react';
 import { History, DollarSign, Trash2, AlertTriangle } from 'lucide-react';
+// Importação direta e blindada contra erros de build
+import { supabase } from '@/lib/supabase';
 
 interface TransactionListProps {
   transacoes: any[];
   categorias: any[];
   dataFiltro: Date;
-  supabase: any;
   onRefresh: () => void;
 }
 
@@ -15,7 +16,6 @@ export default function TransactionList({
   transacoes,
   categorias,
   dataFiltro,
-  supabase,
   onRefresh,
 }: TransactionListProps) {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);

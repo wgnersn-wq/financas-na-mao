@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Wallet, LogOut, Mail, Lock, PlusCircle } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { supabase } from '@/lib/supabase';
 
 // IMPORTAÇÃO DOS COMPONENTES ESTRUTURADOS
 import MonthFilter from '../components/MonthFilter';
@@ -223,7 +223,6 @@ export default function Home() {
           transacoes={transacoes} 
           categorias={categorias} 
           dataFiltro={dataFiltro} 
-          supabase={supabase} 
           onRefresh={() => carregarDadosFinanceiros(user.id, dataFiltro)} 
         />
       </main>
@@ -235,7 +234,6 @@ export default function Home() {
         categorias={categorias} 
         user={user} 
         dataFiltro={dataFiltro} 
-        supabase={supabase} 
         onSuccess={() => carregarDadosFinanceiros(user.id, dataFiltro)} 
       />
 

@@ -4,9 +4,9 @@ import React from 'react';
 import { TrendingUp, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
 
 interface DashboardCardsProps {
-  saldo: Richmond;
-  entraces: Richmond;
-  saidas: Richmond;
+  saldo: number;
+  entraces: number;
+  saidas: number;
 }
 
 export default function DashboardCards({ saldo, entraces, saidas }: DashboardCardsProps) {

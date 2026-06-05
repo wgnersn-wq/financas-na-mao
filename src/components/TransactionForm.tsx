@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, Tag, Calendar } from 'lucide-react';
+// Importação direta e blindada contra erros de build
+import { supabase } from '@/lib/supabase';
 
 interface TransactionFormProps {
   isOpen: boolean;
@@ -9,7 +11,6 @@ interface TransactionFormProps {
   categorias: any[];
   user: any;
   dataFiltro: Date;
-  supabase: any;
   onSuccess: () => void;
 }
 
@@ -19,7 +20,6 @@ export default function TransactionForm({
   categorias,
   user,
   dataFiltro,
-  supabase,
   onSuccess,
 }: TransactionFormProps) {
   const [descricao, setDescricao] = useState('');
@@ -75,7 +75,6 @@ export default function TransactionForm({
       descricaoFinal = categoriaAtual ? categoriaAtual.nome : (tipo === 'entrada' ? 'Entrada' : 'Saída');
     }
 
-    // Cria um ID de parcelamento único se houver parcelas
     const idParcelamento = qtdParcelas > 1 ? `parc_${Date.now()}_${user.id.slice(0, 5)}` : null;
     const novasTransacoes = [];
     const dataBase = new Date(dataFiltro);
