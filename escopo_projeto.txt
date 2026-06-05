@@ -1,6 +1,6 @@
 ===============================================================================
 PROJETO: SISTEMA DE CONTROLE FINANCEIRO PESSOAL MOBILE-FIRST
-ARQUIVAMENTO E ESCOPO PASSO A PASSO
+ARQUIVAMENTO E ESCOPO PASSO A PASSO (VERSÃO ATUALIZADA)
 ===============================================================================
 
 -------------------------------------------------------------------------------
@@ -27,17 +27,19 @@ FASE 4: FLUXO DE AUTENTICAÇÃO E SEGURANÇA [CONCLUÍDO]
 - Criação da tela de Login e tela de Cadastro otimizadas para celular.
 - Implementação de fluxos de login/logout e escuta de estado de sessão ativa.
 
-FASE 5: DASHBOARD FINANCEIRO E LANÇAMENTOS (O CORAÇÃO DO APP) [EM ANDAMENTO]
+FASE 5: DASHBOARD FINANCEIRO E LANÇAMENTOS (O CORAÇÃO DO APP) [CONCLUÍDO]
 - Criação da tela principal com Saldo Atual, Total de Entradas e Total de Saídas [CONCLUÍDO].
 - Desenvolvimento do Formulário de Transações com máscara monetária nativa [CONCLUÍDO].
 - Listagem de transações dinâmicas filtradas por Mês e Ano de navegação [CONCLUÍDO].
 - Substituição de modais nativos por modais UI elegantes e customizados [CONCLUÍDO].
-- IMPLEMENTAÇÃO ATUAL: Exclusão inteligente de parcelamentos vinculados através da coluna 'id_parcelamento'[CONCLUÍDO]..
+- Implementação de exclusão inteligente de parcelamentos vinculados através da coluna 'id_parcelamento' [CONCLUÍDO].
+- Otimização de arquitetura e desacoplamento de propriedades para blindagem contra erros de build do Next.js e da Vercel [CONCLUÍDO].
 
-FASE 6: AJUSTES MÓVEIS, PWA E DEPLOY [A FAZER]
-- Configuração do manifesto PWA (para instalar o app na tela inicial do celular).
-- Testes de usabilidade em navegadores mobile (Safari, Chrome Mobile).
-- Vinculação com o GitHub e Deploy final na Vercel de forma 100% gratuita.
+FASE 6: AJUSTES MÓVEIS, PWA E DEPLOY [EM ANDAMENTO]
+- Vinculação com o GitHub e Deploy em Produção na Vercel com CI/CD [CONCLUÍDO].
+- Testes de usabilidade e responsividade em tempo real em navegadores mobile (Safari, Chrome Mobile) [CONCLUÍDO].
+- INSTALAÇÃO E CONFIGURAÇÃO DA BIBLIOTECA DE ÍCONES (lucide-react) EM AMBIENTE DE PRODUÇÃO [CONCLUÍDO].
+- IMPLEMENTAÇÃO ATUAL: Configuração do manifesto PWA (para instalar o app como aplicativo nativo na tela inicial do celular) [A FAZER].
 
 -------------------------------------------------------------------------------
 2. ARQUITETURA FÍSICA E FLUXO DE DADOS (INFRAESTRUTURA)
@@ -48,12 +50,12 @@ FASE 6: AJUSTES MÓVEIS, PWA E DEPLOY [A FAZER]
        │ (Acessa via Navegador Web ou Ícone PWA)
        │
        ▼
- [ VERCEL (Hospedagem Cloud) ] ── Hosting do Front-End (Next.js Estático/Serverless)
+ [ VERCEL (Hospedagem Cloud) ] ── Hosting do Front-End (Next.js Estático/Serverless) [ONLINE]
        │
        │ (Requisições HTTP / Conexão SDK Web Segura)
        │
        ▼
- [ SUPABASE ECOSYSTEM ]
+ [ SUPABASE ECOSYSTEM ] [ONLINE]
        ├── API Gateway / Kong (Gerencia as requisições seguras)
        ├── GoTrue (Módulo de Autenticação / Login / JWT)
        └── PostgreSQL Database (Banco de Dados Otimizado na Nuvem)

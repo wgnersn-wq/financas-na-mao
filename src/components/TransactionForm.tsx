@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Tag, Calendar } from 'lucide-react';
+import { X, Tag, Calendar, CheckCircle2 } from 'lucide-react';
 // Importação direta e blindada contra erros de build
 import { supabase } from '@/lib/supabase';
 
@@ -27,6 +27,7 @@ export default function TransactionForm({
   const [tipo, setTipo] = useState<'entrada' | 'saida'>('saida');
   const [categoriaId, setCategoriaId] = useState('');
   const [parcelas, setParcelas] = useState('1');
+  const [sucesso, setSucesso] = useState(false);
 
   const categoriasFiltradas = categorias.filter((cat) => cat.tipo === tipo);
 
@@ -101,11 +102,18 @@ export default function TransactionForm({
     if (error) {
       alert('Erro ao salvar lançamento: ' + error.message);
     } else {
-      setDescricao('');
-      setValor('');
-      setParcelas('1');
-      onClose();
-      onSuccess();
+      // Dispara a animação visual de sucesso na tela
+      setSucesso(true);
+
+      // Espera 1.5 segundos mostrando a tela de sucesso antes de resetar e fechar o formulário
+      setTimeout(() => {
+        setSucesso(false);
+        setDescricao('');
+        setValor('');
+        setParcelas('1');
+        onClose();
+        onSuccess();
+      }, 1500);
     }
   }
 
@@ -113,7 +121,17 @@ export default function TransactionForm({
 
   return (
     <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm z-30 flex flex-col justify-end">
-      <div className="bg-slate-900 border-t border-slate-800 rounded-t-3xl p-6 space-y-4 animate-in slide-in-from-bottom duration-200 max-w-md mx-auto w-full">
+      <div className="bg-slate-900 border-t border-slate-800 rounded-t-3xl p-6 space-y-4 animate-in slide-in-from-bottom duration-200 max-w-md mx-auto w-full relative overflow-hidden">
+        
+        {/* TELA FLUTUANTE DE SUCESSO INTEGRADA */}
+        {sucesso && (
+          <div className="absolute inset-0 bg-slate-900/95 flex flex-col items-center justify-center space-y-3 z-40 animate-in fade-in duration-200">
+            <CheckCircle2 className="w-16 h-16 text-emerald-400 animate-bounce" />
+            <p className="text-emerald-400 font-bold text-lg">Lançamento Salvo!</p>
+            <p className="text-xs text-slate-400">Seus dados foram processados com sucesso.</p>
+          </div>
+        )}
+
         <div className="flex justify-between items-center border-b border-slate-800 pb-3">
           <h3 className="text-sm font-bold text-slate-200">Adicionar Transação</h3>
           <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-200">
