@@ -4,32 +4,28 @@ import React, { useState, useEffect } from 'react';
 import { Wallet, LogOut, Mail, Lock, PlusCircle, BarChart3, ListCollapse, AlertTriangle, CheckCircle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
-// IMPORTAÇÃO DOS COMPONENTES ESTRUTURADOS COM ALIAS OFICIAL
+// IMPORTAÇÃO DOS COMPONENTES
 import MonthFilter from '@/components/MonthFilter';
 import TransactionForm from '@/components/TransactionForm';
 import TransactionList from '@/components/TransactionList';
+import ReportTab from '@/components/ReportTab'; // Componente isolado
 
 export default function Home() {
-  // Estados de Sessão e Carregamento
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isLogin, setIsLogin] = useState(true);
 
-  // Estados dos Formulários de Autenticação
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState('');
   const [authSuccess, setAuthSuccess] = useState('');
   
-  // Criação de instância de data local segura para evitar fuso horário UTC incorreto
   const [dataFiltro, setDataFiltro] = useState<Date>(new Date());
   
-  // Sincroniza a data do dispositivo do usuário uma vez ao montar o componente
   useEffect(() => {
     setDataFiltro(new Date());
   }, []);
 
-  // Estados do Modal, Dados Financeiros e Controle de Abas
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [saldo, setSaldo] = useState(0);
   const [entraces, setEntraces] = useState(0);
@@ -38,7 +34,6 @@ export default function Home() {
   const [categorias, setCategorias] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'inicio' | 'relatorios'>('inicio');
 
-  // 1. Verificar autenticação inicial e monitorar mudanças de sessão
   useEffect(() => {
     let isSubscribed = true;
 
@@ -50,13 +45,11 @@ export default function Home() {
       setLoading(false);
     }
 
-    // Verifica quem é o usuário logo que a página abre
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) carregarTudo(user);
       else setLoading(false);
     });
 
-    // Fica de olho no login/logout, mas filtra os eventos para não rodar duplicado
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session?.user) {
         carregarTudo(session.user);
@@ -76,23 +69,18 @@ export default function Home() {
     };
   }, []);
 
-  // Recarregar os dados automaticamente quando o usuário mudar o mês do filtro
   useEffect(() => {
     if (user) carregarDadosFinanceiros(user.id, dataFiltro);
   }, [dataFiltro, user]);
 
-  // Gerenciamento de categorias automáticas personalizadas
   async function gerenciarCategoriasPadrao(userId: string) {
     const { data: existentes } = await supabase.from('categorias').select('*').eq('user_id', userId);
     if (!existentes || existentes.length === 0) {
       const padrao = [
-        // ENTRADAS
         { user_id: userId, nome: 'Salário', tipo: 'entrada', cor: '#10b981' },
         { user_id: userId, nome: 'Extra', tipo: 'entrada', cor: '#34d399' },
         { user_id: userId, nome: 'Outros ganhos', tipo: 'entrada', cor: '#f59e0b' },
         { user_id: userId, nome: 'Serviços', tipo: 'entrada', cor: '#60a5fa' },
-        
-        // SAÍDAS
         { user_id: userId, nome: 'Alimentação', tipo: 'saida', cor: '#ef4444' },
         { user_id: userId, nome: 'Transporte', tipo: 'saida', cor: '#3b82f6' },
         { user_id: userId, nome: 'Água', tipo: 'saida', cor: '#06b6d4' },
@@ -112,12 +100,10 @@ export default function Home() {
     }
   }
 
-  // Buscar dados reais baseados estritamente das datas locais
   async function carregarDadosFinanceiros(userId: string, dataAlvo: Date) {
     const ano = dataAlvo.getFullYear();
     const mes = dataAlvo.getMonth();
     
-    // Tratamento estrito de string de data local prevenindo quebra de fuso horário
     const primeiroDia = `${ano}-${String(mes + 1).padStart(2, '0')}-01`;
     const ultimoDia = `${ano}-${String(mes + 1).padStart(2, '0')}-${String(new Date(ano, mes + 1, 0).getDate()).padStart(2, '0')}`;
 
@@ -144,7 +130,6 @@ export default function Home() {
     }
   }
 
-  // Alteração manual de meses (Avançar / Voltar)
   function alterarMes(direcao: 'anterior' | 'proximo') {
     setDataFiltro(prev => {
       const novaData = new Date(prev);
@@ -153,7 +138,6 @@ export default function Home() {
     });
   }
 
-  // Autenticação do Supabase
   async function handleAuth(e: React.FormEvent) {
     e.preventDefault();
     setAuthError(''); setAuthSuccess('');
@@ -167,22 +151,10 @@ export default function Home() {
     }
   }
 
-  // Agrupamento dinâmico dos gastos por categorias para a aba de relatórios
-  const relatorioCategorias = categorias
-    .map((cat) => {
-      const totalGasto = transacoes
-        .filter((t) => t.categoria_id === cat.id && t.tipo === 'saida')
-        .reduce((acc, t) => acc + Number(t.valor), 0);
-      return { ...cat, total: totalGasto };
-    })
-    .filter((c) => c.total > 0)
-    .sort((a, b) => b.total - a.total);
-
   if (loading) {
     return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-emerald-400 font-bold">Carregando seu controle...</div>;
   }
 
-  // Formulário de Autenticação / Login Inicial
   if (!user) {
     return (
       <div className="min-h-screen bg-slate-950 text-slate-50 flex flex-col justify-center px-6 w-full sm:max-w-md sm:mx-auto sm:shadow-2xl sm:border-x sm:border-slate-900">
@@ -191,7 +163,6 @@ export default function Home() {
             <Wallet className="w-10 h-10 text-emerald-400" />
           </div>
           <h2 className="text-2xl font-black tracking-tight">Finanças na Mão</h2>
-          <p className="text-sm text-slate-400 mt-1">Seu controle financeiro pessoal de qualquer lugar</p>
         </div>
         <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-4 shadow-xl">
           <h3 className="text-lg font-bold text-slate-100">{isLogin ? 'Faça seu Login' : 'Criar Nova Conta'}</h3>
@@ -233,10 +204,8 @@ export default function Home() {
       </header>
 
       <main className="flex-1 px-6 pt-6 overflow-y-auto space-y-6">
-        {/* 1. FILTRO DE MÊS */}
         <MonthFilter dataFiltro={dataFiltro} onChangeMes={alterarMes} />
 
-        {/* 2. CARD DO BALANÇO DINÂMICO (ALERTA DE SALDO VERMELHO VINHO INTEGRADO) */}
         <div className={`p-6 rounded-3xl border transition-all duration-300 relative overflow-hidden shadow-xl ${
           isNoVermelho 
             ? 'bg-gradient-to-br from-rose-950 via-slate-900 to-slate-900 border-rose-500/40 shadow-rose-950/25' 
@@ -255,7 +224,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* CARDS SECUNDÁRIOS DE ENTRADAS / SAÍDAS */}
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
             <p className="text-xs text-slate-400 font-medium">Entradas</p>
@@ -267,10 +235,8 @@ export default function Home() {
           </div>
         </div>
 
-        {/* ALTERNÂNCIA DINÂMICA VIA ABAS: ABA INÍCIO VS ABA RELATÓRIOS */}
         {activeTab === 'inicio' ? (
           <>
-            {/* BOTÃO ADICIONAR LANÇAMENTO (Foco Mobile) */}
             <button 
               type="button"
               onClick={() => setIsModalOpen(true)} 
@@ -280,7 +246,6 @@ export default function Home() {
               <span className="text-sm font-semibold">Novo Lançamento Rápido</span>
             </button>
 
-            {/* 3. LISTA HISTÓRICA E MODAL DE DELEÇÃO */}
             <TransactionList 
               transacoes={transacoes} 
               categorias={categorias} 
@@ -289,44 +254,16 @@ export default function Home() {
             />
           </>
         ) : (
-          /* NOVO PAINEL GRÁFICO DE DISTRIBUIÇÃO MENSAL POR CATEGORIAS */
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-4 shadow-xl animate-in fade-in duration-200">
-            <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
-              <BarChart3 className="w-5 h-5 text-emerald-400" />
-              <h3 className="text-sm font-bold text-slate-100">Distribuição de Gastos do Mês</h3>
-            </div>
-
-            {relatorioCategorias.length === 0 ? (
-              <p className="text-xs text-slate-400 text-center py-6">Nenhum gasto registrado neste mês.</p>
-            ) : (
-              <div className="space-y-4">
-                {relatorioCategorias.map((cat) => {
-                  const percentual = saidas > 0 ? (cat.total / saidas) * 100 : 0;
-                  return (
-                    <div key={cat.id} className="space-y-1.5">
-                      <div className="flex justify-between text-xs font-semibold">
-                        <span className="text-slate-300 flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cat.cor || '#6b7280' }} />
-                          {cat.nome}
-                        </span>
-                        <span className="text-slate-100">
-                          R$ {cat.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} 
-                          <span className="text-slate-500 font-normal ml-1.5">({percentual.toFixed(0)}%)</span>
-                        </span>
-                      </div>
-                      <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-850">
-                        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${percentual}%`, backgroundColor: cat.cor || '#6b7280' }} />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+          <ReportTab 
+            transacoes={transacoes} 
+            categorias={categorias} 
+            saidas={saidas} 
+            entradas={entraces} 
+            dataFiltro={dataFiltro} 
+          />
         )}
       </main>
 
-      {/* 4. MODAL / FORMULÁRIO DE INSERÇÃO */}
       <TransactionForm 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
@@ -336,7 +273,6 @@ export default function Home() {
         onSuccess={() => carregarDadosFinanceiros(user.id, dataFiltro)} 
       />
 
-      {/* NAVBAR INFERIOR ADAPTÁVEL: AGORA COM SISTEMA DE ABAS EM TRÊS EIXOS */}
       <nav className="fixed bottom-0 left-0 right-0 w-full sm:max-w-md mx-auto bg-slate-900/90 backdrop-blur-md border-t border-slate-800/80 px-6 py-3 flex justify-around items-center z-20">
         <button 
           type="button" 
