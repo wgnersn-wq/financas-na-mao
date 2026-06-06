@@ -28,6 +28,7 @@ export default function TransactionForm({
   const [categoriaId, setCategoriaId] = useState('');
   const [parcelas, setParcelas] = useState('1');
   const [sucesso, setSucesso] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false); // Nova trava de segurança
 
   const categoriasFiltradas = categorias.filter((cat) => cat.tipo === tipo);
 
@@ -59,11 +60,15 @@ export default function TransactionForm({
 
   async function handleAdicionarTransacao(e: React.FormEvent) {
     e.preventDefault();
-    if (!valor || !user) return;
+    // Bloqueia se já estiver enviando ou faltar dados
+    if (!valor || !user || isSubmitting) return;
+
+    setIsSubmitting(true); // Ativa a trava
 
     const valorTotal = converterMascaraParaNumero(valor);
     if (valorTotal <= 0) {
       alert('Por favor, digite um valor válido.');
+      setIsSubmitting(false); // Libera em caso de erro
       return;
     }
 
@@ -101,16 +106,16 @@ export default function TransactionForm({
 
     if (error) {
       alert('Erro ao salvar lançamento: ' + error.message);
+      setIsSubmitting(false); // Libera o botão se der erro
     } else {
-      // Dispara a animação visual de sucesso na tela
       setSucesso(true);
 
-      // Espera 1.5 segundos mostrando a tela de sucesso antes de resetar e fechar o formulário
       setTimeout(() => {
         setSucesso(false);
         setDescricao('');
         setValor('');
         setParcelas('1');
+        setIsSubmitting(false); // Libera o botão após sucesso
         onClose();
         onSuccess();
       }, 1500);
@@ -123,7 +128,6 @@ export default function TransactionForm({
     <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm z-30 flex flex-col justify-end">
       <div className="bg-slate-900 border-t border-slate-800 rounded-t-3xl p-6 space-y-4 animate-in slide-in-from-bottom duration-200 max-w-md mx-auto w-full relative overflow-hidden">
         
-        {/* TELA FLUTUANTE DE SUCESSO INTEGRADA */}
         {sucesso && (
           <div className="absolute inset-0 bg-slate-900/95 flex flex-col items-center justify-center space-y-3 z-40 animate-in fade-in duration-200">
             <CheckCircle2 className="w-16 h-16 text-emerald-400 animate-bounce" />
@@ -207,11 +211,6 @@ export default function TransactionForm({
                 <option value="6">6 vezes</option>
                 <option value="12">12 vezes</option>
               </select>
-              {parcelas !== '1' && valor && (
-                <p className="text-[10px] text-emerald-400 mt-1 px-1">
-                  Projeção: {parcelas}x de R$ {(converterMascaraParaNumero(valor) / parseInt(parcelas)).toLocaleString('pt-BR', {minimumFractionDigits: 2})} nos próximos meses.
-                </p>
-              )}
             </div>
           )}
 
@@ -226,10 +225,14 @@ export default function TransactionForm({
             />
           </div>
 
-          <button type="submit" className={`w-full py-3 rounded-xl text-sm font-bold shadow-lg mt-2 transition-colors ${
-            tipo === 'entrada' ? 'bg-emerald-500 text-slate-950 hover:bg-emerald-600' : 'bg-rose-500 text-white hover:bg-rose-600'
-          }`}>
-            Confirmar Lançamento
+          <button 
+            type="submit" 
+            disabled={isSubmitting}
+            className={`w-full py-3 rounded-xl text-sm font-bold shadow-lg mt-2 transition-all ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''} ${
+              tipo === 'entrada' ? 'bg-emerald-500 text-slate-950 hover:bg-emerald-600' : 'bg-rose-500 text-white hover:bg-rose-600'
+            }`}
+          >
+            {isSubmitting ? 'Salvando...' : 'Confirmar Lançamento'}
           </button>
         </form>
       </div>

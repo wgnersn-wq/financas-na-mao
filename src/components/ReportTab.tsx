@@ -1,7 +1,8 @@
 'use client';
 
-import React from 'react';
-import { BarChart3, Download, TrendingDown } from 'lucide-react';
+import React, { useState } from 'react';
+import { BarChart3, Download, TrendingDown, Send } from 'lucide-react';
+import { enviarGastosPorPessoa } from '@/utils/whatsapp';
 
 interface ReportTabProps {
   transacoes: any[];
@@ -12,6 +13,8 @@ interface ReportTabProps {
 }
 
 export default function ReportTab({ transacoes, categorias, saidas, entradas, dataFiltro }: ReportTabProps) {
+  const [buscaPessoa, setBuscaPessoa] = useState('');
+
   // 1. Agrupamento dinâmico dos gastos por categorias
   const relatorioCategorias = categorias
     .map((cat) => {
@@ -23,20 +26,19 @@ export default function ReportTab({ transacoes, categorias, saidas, entradas, da
     .filter((c) => c.total > 0)
     .sort((a, b) => b.total - a.total);
 
-  // 2. Descobrir qual foi o maior gasto para gerar o Insight
   const categoriaMaiorGasto = relatorioCategorias.length > 0 ? relatorioCategorias[0] : null;
   const percentualMaiorGasto = categoriaMaiorGasto && saidas > 0 
     ? ((categoriaMaiorGasto.total / saidas) * 100).toFixed(0) 
     : 0;
 
-  // 3. Função de Exportar CSV (Excel) - Método Blob (Corrigido para colunas)
+  // 3. Função de Exportar CSV (Excel)
   function exportarRelatorioCSV() {
     if (transacoes.length === 0) {
       alert('Não há transações neste mês para exportar.');
       return;
     }
 
-    const separador = ';'; // Padrão recomendado para Excel Brasil
+    const separador = ';';
     const cabecalhos = ['Data', 'Nome', 'Categoria', 'Tipo', 'Valor'];
     
     const linhas = transacoes.map(t => {
@@ -49,7 +51,6 @@ export default function ReportTab({ transacoes, categorias, saidas, entradas, da
       return [dataFormatada, t.descricao || 'Lançamento', categoriaNome, tipo, `R$ ${valor}`].join(separador);
     });
 
-    // Adiciona o BOM (\uFEFF) para forçar o Excel a reconhecer acentos (UTF-8)
     const conteudoCSV = "\uFEFF" + [cabecalhos.join(separador), ...linhas].join('\n');
     const blob = new Blob([conteudoCSV], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -65,36 +66,47 @@ export default function ReportTab({ transacoes, categorias, saidas, entradas, da
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-4 shadow-xl animate-in fade-in duration-200">
       
-      {/* CABEÇALHO DO RELATÓRIO COM BOTÃO DE EXPORTAR */}
-      <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-        <div className="flex items-center gap-2">
-          <BarChart3 className="w-5 h-5 text-emerald-400" />
-          <h3 className="text-sm font-bold text-slate-100">Distribuição Mensal</h3>
+      <div className="flex flex-col gap-3 border-b border-slate-800 pb-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <BarChart3 className="w-5 h-5 text-emerald-400" />
+            <h3 className="text-sm font-bold text-slate-100">Distribuição Mensal</h3>
+          </div>
+          <button 
+            onClick={exportarRelatorioCSV}
+            className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 py-1.5 px-3 rounded-lg text-xs font-semibold transition-colors border border-slate-700 hover:border-slate-600"
+          >
+            <Download className="w-3.5 h-3.5" />
+            Exportar
+          </button>
         </div>
-        <button 
-          onClick={exportarRelatorioCSV}
-          className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 py-1.5 px-3 rounded-lg text-xs font-semibold transition-colors border border-slate-700 hover:border-slate-600"
-        >
-          <Download className="w-3.5 h-3.5" />
-          Exportar
-        </button>
+
+        {/* Campo de busca e envio WhatsApp */}
+        <div className="flex gap-2">
+          <input 
+            type="text"
+            placeholder="Nome (ex: Irmão)"
+            className="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500"
+            value={buscaPessoa}
+            onChange={(e) => setBuscaPessoa(e.target.value)}
+          />
+          <button 
+            onClick={() => enviarGastosPorPessoa(transacoes, buscaPessoa)}
+            className="bg-emerald-600 hover:bg-emerald-500 text-white p-2 rounded-lg transition-colors"
+          >
+            <Send className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
-      {/* CARD DE INSIGHT AUTOMÁTICO */}
+      {/* CARD DE INSIGHT E LISTA (Restante do seu código original) */}
       {categoriaMaiorGasto && (
         <div className="bg-slate-950/50 p-3 rounded-xl border border-slate-800/60 flex items-start gap-3">
-          <div className="bg-slate-800 p-2 rounded-lg mt-0.5">
-            <TrendingDown className="w-4 h-4 text-rose-400" />
-          </div>
-          <div>
-            <p className="text-xs text-slate-300 leading-relaxed">
-              Atenção: <strong>{percentualMaiorGasto}%</strong> das suas saídas neste mês foram com <strong style={{ color: categoriaMaiorGasto.cor }}>{categoriaMaiorGasto.nome}</strong>.
-            </p>
-          </div>
+          <div className="bg-slate-800 p-2 rounded-lg mt-0.5"><TrendingDown className="w-4 h-4 text-rose-400" /></div>
+          <p className="text-xs text-slate-300">Atenção: <strong>{percentualMaiorGasto}%</strong> das saídas foram com <strong style={{ color: categoriaMaiorGasto.cor }}>{categoriaMaiorGasto.nome}</strong>.</p>
         </div>
       )}
 
-      {/* BARRAS DE PROGRESSO */}
       {relatorioCategorias.length === 0 ? (
         <p className="text-xs text-slate-400 text-center py-6">Nenhum gasto registrado neste mês.</p>
       ) : (
